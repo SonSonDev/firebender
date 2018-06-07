@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    .correction {
+    flex-basis: auto;
+    flex-grow: auto;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
+</head>
+<body>
+  <div class="section container">
+    <div class="box">
+
+      <div id="container" class="notification is-white">
+
+        <!-- <div class="level">
+          <div class="level-left">
+          </div>
+          <div class="level-right tag is-large is-info">
+            1
+          </div>
+        </div>
+
+        <div class="level">
+          <div class="level-left tag is-large">
+            2
+          </div>
+          <div class="level-right">
+          </div>
+        </div>
+
+        <div class="level">
+          <div class="level-left">
+          </div>
+          <div class="level-right tag is-large is-info">
+            3
+          </div>
+        </div>
+
+        <div class="level">
+          <div class="level-left tag is-large">
+            4
+          </div>
+          <div class="level-right">
+          </div>
+        </div> -->
+
+      </div>
+
+      <div class="field has-addons">
+          <p class="control is-expanded">
+            <input class="input" type="text">
+          </p>
+          <p class="control">
+            <a class="button">
+              Send
+            </a>
+          </p>
+        </div>
+      
+    </div>
+  </div>
+</body>
+
+
+<script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCmYqUupRx-PTlbr1xNMGWAkFE3Uk87K9o",
+    authDomain: "firebender-12345.firebaseapp.com",
+    databaseURL: "https://firebender-12345.firebaseio.com",
+    projectId: "firebender-12345",
+    storageBucket: "firebender-12345.appspot.com",
+    messagingSenderId: "970384728078"
+  };
+  firebase.initializeApp(config);
+</script>
+
+
+  <!-- on écrit le code là théo !!! -->
+<script>
+  const database = firebase.database();
+  
+  var yourName = prompt("Enter your name");
+
+  var dom = {
+      input: document.querySelector('.input'),
+      container: document.querySelector('#container')
+  }
+
+  dom.input.addEventListener('keyup', function(event){
+    if (event.which === 13 && this.value!=="") {
+      newMessage(this.value);
+      this.value=""
+    }
+  })
+
+  function newMessage(text){
+    write(text)
+    read()
+  }
+
+
+  function write(text) {
+    
+    firebase.database().ref('message/').push({
+      author: yourName,
+      text: text
+    });
+  }
+
+  function read() {
+
+    return firebase.database().ref('message/').once('value')
+    .then(function(snapshot) {
+
+      dom.container.innerHTML = ''
+
+      var response = snapshot.val()
+
+      for (const key in response) {
+        const item = response[key];
+
+        if(item.author===yourName){
+          addMessage(item.text, item.author)
+        } else {
+          addResponse(item.text, item.author)
+        }
+      }
+    })
+  }
+
+
+  function addMessage(text, author) {
+    dom.container.innerHTML += `
+    <div style="text-align: right">
+      ${author} : 
+    </div>
+    
+    <div class="level">
+      <div class="level-left">
+      </div>
+      <div class="level-right tag is-large is-info">
+          ${text}
+      </div>
+    </div>
+    `
+  }
+
+  function addResponse(text, author) {
+    dom.container.innerHTML += `
+    ${author} : 
+    <div class="level">
+      <div class="level-left tag is-large is-light">
+        ${text}
+      </div>
+      <div class="level-right">
+      </div>
+    </div>
+    `
+  }
+
+
+
+
+var ref = firebase.database().ref("message/");
+firebase.database().ref().on('value', function(snapshot) {
+
+
+      var response = snapshot.val().message
+      dom.container.innerHTML = ''
+
+      for (const key in response) {
+        const item = response[key];
+        if(item.author===yourName){
+          addMessage(item.text, item.author)
+        } else {
+          addResponse(item.text, item.author)
+        }
+
+
+      }  
+      // console.log(response);
+      scrollAuto()
+});
+
+
+function scrollAuto(){
+    window.scroll({
+      top: document.body.clientHeight, 
+      left: 0, 
+      behavior: 'smooth' 
+    });
+}
+
+</script>
+
+</html>
