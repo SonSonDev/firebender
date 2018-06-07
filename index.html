@@ -103,50 +103,30 @@
       this.value=""
     }
   })
-
   dom.sendButton.addEventListener('click', function() {
     newMessage(dom.input.value);
     dom.input.value=""
   })
   
+//scroll to the bottom of the page
+function scrollAuto(){
+    window.scroll({
+      top: document.body.clientHeight, 
+      left: 0, 
+      behavior: 'smooth' 
+    });
+}
 
+//send a new message
   function newMessage(text){
-    write(text)
-    read()
-  }
-
-
-  function write(text) {
-    
     firebase.database().ref('message/').push({
       author: yourName,
       text: text
     });
   }
 
-  function read() {
-
-    return firebase.database().ref('message/').once('value')
-    .then(function(snapshot) {
-
-      dom.container.innerHTML = ''
-
-      var response = snapshot.val()
-
-      for (const key in response) {
-        const item = response[key];
-
-        if(item.author===yourName){
-          addMessage(item.text, item.author)
-        } else {
-          addResponse(item.text, item.author)
-        }
-      }
-    })
-  }
-
-
-  function addMessage(text, author) {
+//show my messages
+  function myMessages(text, author) {
     dom.container.innerHTML += `
     <div class="align-right">
       ${author} : 
@@ -162,7 +142,8 @@
     `
   }
 
-  function addResponse(text, author) {
+//show messages of other people
+  function otherMessages(text, author) {
     dom.container.innerHTML += `
     ${author} : 
     <div class="level">
@@ -176,37 +157,22 @@
   }
 
 
+firebase.database().ref("message/").on('value', function(snapshot) {
 
-
-var ref = firebase.database().ref("message/");
-firebase.database().ref().on('value', function(snapshot) {
-
-
-      var response = snapshot.val().message
+      var response = snapshot.val()
       dom.container.innerHTML = ''
-
       for (const key in response) {
         const item = response[key];
         if(item.author===yourName){
-          addMessage(item.text, item.author)
+          myMessages(item.text, item.author)
         } else {
-          addResponse(item.text, item.author)
+          otherMessages(item.text, item.author)
         }
-
-
       }  
-      // console.log(response);
       scrollAuto()
 });
 
 
-function scrollAuto(){
-    window.scroll({
-      top: document.body.clientHeight, 
-      left: 0, 
-      behavior: 'smooth' 
-    });
-}
 
 </script>
 
