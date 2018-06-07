@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <style>
-    .correction {
-    flex-basis: auto;
-    flex-grow: auto;
+    @media (min-width: 768px) {
+      .align-right {
+        text-align: right;
+      }
     }
   </style>
   <meta charset="UTF-8">
@@ -92,7 +93,8 @@
 
   var dom = {
       input: document.querySelector('.input'),
-      container: document.querySelector('#container')
+      container: document.querySelector('#container'),
+      sendButton: document.querySelector('.button')
   }
 
   dom.input.addEventListener('keyup', function(event){
@@ -101,6 +103,12 @@
       this.value=""
     }
   })
+
+  dom.sendButton.addEventListener('click', function() {
+    newMessage(dom.input.value);
+    dom.input.value=""
+  })
+  
 
   function newMessage(text){
     write(text)
@@ -140,7 +148,7 @@
 
   function addMessage(text, author) {
     dom.container.innerHTML += `
-    <div style="text-align: right">
+    <div class="align-right">
       ${author} : 
     </div>
     
