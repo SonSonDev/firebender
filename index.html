@@ -5,12 +5,26 @@
     .messageContainer {
       margin-bottom: 30px;
     }
+    .column{
+      max-width: 100%;
+    }
+    @media(min-width:769px){
+    .column{
+      max-width: 70%;
+    }
+  }
+  .author {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
   </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <title>FireBender</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
+  <link rel="shortcut icon" href="./icon.PNG" type="image/x-icon">
 </head>
 <body>
   <div class="section container">
@@ -54,7 +68,7 @@
 
       <div class="field has-addons">
           <p class="control is-expanded">
-            <input class="input" type="text">
+            <input class="input sendMessage" type="text">
           </p>
           <p class="control">
             <a class="button">
@@ -65,6 +79,13 @@
       
     </div>
   </div>
+
+  <div class="columns is-mobile">
+      <div class="column is-3 is-offset-9">
+        <input class="input max" type="number" placeholder="Max number of messages">
+      </div>
+  </div>
+
 </body>
 
 
@@ -85,15 +106,35 @@
 
   <!-- on écrit le code là théo !!! -->
 <script>
+
+  ///
   const database = firebase.database();
   
   var yourName = prompt("Enter your name");
 
   var dom = {
-      input: document.querySelector('.input'),
+      input: document.querySelector('.sendMessage'),
       container: document.querySelector('#container'),
-      sendButton: document.querySelector('.button')
+      sendButton: document.querySelector('.button'),
+      maxInput: document.querySelector('.max')
   }
+
+
+
+//InputMax
+var max=0
+  dom.maxInput.addEventListener('keyup', function(event){
+    if (event.which===13) {
+      max=Number(this.value)
+      
+      firebase.database().ref("message/").once('value', function(snapshot) {
+        render(snapshot.val());
+        scrollAuto();
+      });
+    }
+  })
+
+
 
   dom.input.addEventListener('keyup', function(event){
     if (event.which === 13 && this.value!=="") {
@@ -108,11 +149,13 @@
   
 //scroll to the bottom of the page
 function scrollAuto(){
+  setTimeout(function(){
     window.scroll({
       top: document.body.clientHeight, 
       left: 0, 
       behavior: 'smooth' 
     });
+  }, 100)
 }
 
 //send a new message
@@ -124,36 +167,45 @@ function newMessage(text){
 }
 
 firebase.database().ref("message/").on('value', function(snapshot) {
-
-      var response = snapshot.val()
-      dom.container.innerHTML = ''
-      for (const key in response) {
-        const item = response[key];
-
-        if(item.author.includes("aaho")){
-          firebase.database().ref("message/"+key+"/").remove()
-        } else if(item.author===yourName){
-          myMessages(item.text, item.author, key)
-        } else {
-          otherMessages(item.text, item.author, key)
-        }
-      }  
-      scrollAuto();
+      render(snapshot.val());
 });
 
+function render(response){
+  dom.container.innerHTML = ''
+  var count=0;
+  
+  var debut = Object.keys(response).length - max;
 
+  for (const key in response) {
+     
+      const item = response[key];
+      if (max===0 || debut<=count) {
+        
+      if(item.author.includes("aaho")){
+        firebase.database().ref("message/"+key+"/").remove()
+      } else if(item.author===yourName){
+        myMessages(item.text, item.author, key)
+      } else {
+        otherMessages(item.text, item.author, key)
+      }
+    
+      }
+    count++;
+  }  
+  scrollAuto();  
+}
 
 //show my messages
 function myMessages(text, author, key) {
     dom.container.innerHTML += `
     <div class="messageContainer">    
       <div style="justify-content:flex-end" class="columns">
-        <div style="max-width:100%; border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow">
+        <div style="border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow author is-paddingless">
           ${author}
         </div>  
       </div>
       <div style="justify-content:flex-end" class="columns">
-        <div style="max-width:100%; border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow has-background-primary has-text-white">${text}</div>
+        <div style="border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow has-background-primary has-text-white">${text}</div>
       </div>
     </div>    
     `
@@ -164,12 +216,12 @@ function myMessages(text, author, key) {
     dom.container.innerHTML += `
     <div class="messageContainer">    
       <div class="columns">    
-        <div style="max-width:100%; border-radius:5px;" class="column is-narrow">
+        <div style="border-radius:5px;" class="column is-narrow author is-paddingless">
           ${author}
         </div>        
       </div>
       <div class="columns">
-        <div style="max-width:100%; border-radius:5px;" class="column is-narrow has-background-white-ter">${text}</div>
+          <div style="border-radius:5px; display: flex; justify-content: flex-start; align-items: start;" class="column is-narrow has-background-white-ter">${text}</div>
       </div>
     </div>
     ` 
