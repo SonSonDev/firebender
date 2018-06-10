@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
   <style>
-    @media (min-width: 768px) {
-      .align-right {
-        text-align: right;
-      }
+    .messageContainer {
+      margin-bottom: 30px;
     }
   </style>
   <meta charset="UTF-8">
@@ -18,7 +16,7 @@
   <div class="section container">
     <div class="box">
 
-      <div id="container" class="notification is-white">
+      <div id="container" class="is-white">
 
         <!-- <div class="level">
           <div class="level-left">
@@ -118,44 +116,12 @@ function scrollAuto(){
 }
 
 //send a new message
-  function newMessage(text){
-    firebase.database().ref('message/').push({
-      author: yourName,
-      text: text
-    });
-  }
-
-//show my messages
-  function myMessages(text, author) {
-    dom.container.innerHTML += `
-    <div class="align-right">
-      ${author} : 
-    </div>
-    
-    <div class="level">
-      <div class="level-left">
-      </div>
-      <div class="level-right tag is-large is-info">
-          ${text}
-      </div>
-    </div>
-    `
-  }
-
-//show messages of other people
-  function otherMessages(text, author) {
-    dom.container.innerHTML += `
-    ${author} : 
-    <div class="level">
-      <div class="level-left tag is-large is-light">
-        ${text}
-      </div>
-      <div class="level-right">
-      </div>
-    </div>
-    `
-  }
-
+function newMessage(text){
+  firebase.database().ref('message/').push({
+    author: yourName,
+    text: text
+  });
+}
 
 firebase.database().ref("message/").on('value', function(snapshot) {
 
@@ -163,14 +129,51 @@ firebase.database().ref("message/").on('value', function(snapshot) {
       dom.container.innerHTML = ''
       for (const key in response) {
         const item = response[key];
-        if(item.author===yourName){
-          myMessages(item.text, item.author)
+
+        if(item.author.includes("aaho")){
+          firebase.database().ref("message/"+key+"/").remove()
+        } else if(item.author===yourName){
+          myMessages(item.text, item.author, key)
         } else {
-          otherMessages(item.text, item.author)
+          otherMessages(item.text, item.author, key)
         }
       }  
-      scrollAuto()
+      scrollAuto();
 });
+
+
+
+//show my messages
+function myMessages(text, author, key) {
+    dom.container.innerHTML += `
+    <div class="messageContainer">    
+      <div style="justify-content:flex-end" class="columns">
+        <div style="max-width:100%; border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow">
+          ${author}
+        </div>  
+      </div>
+      <div style="justify-content:flex-end" class="columns">
+        <div style="max-width:100%; border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow has-background-primary has-text-white">${text}</div>
+      </div>
+    </div>    
+    `
+  }
+
+//show messages of other people
+  function otherMessages(text, author, key) {
+    dom.container.innerHTML += `
+    <div class="messageContainer">    
+      <div class="columns">    
+        <div style="max-width:100%; border-radius:5px;" class="column is-narrow">
+          ${author}
+        </div>        
+      </div>
+      <div class="columns">
+        <div style="max-width:100%; border-radius:5px;" class="column is-narrow has-background-white-ter">${text}</div>
+      </div>
+    </div>
+    ` 
+  }
 
 
 
