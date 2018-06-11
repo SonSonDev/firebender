@@ -1,93 +1,64 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>
-    .messageContainer {
-      margin-bottom: 30px;
-    }
-    .column{
-      max-width: 100%;
-    }
-    @media(min-width:769px){
-    .column{
-      max-width: 70%;
-    }
-  }
-  .author {
-    font-size: 20px;
-    font-weight: 600;
-  }
-
-  </style>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>FireBender</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
-  <link rel="shortcut icon" href="./icon.PNG" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css">
+    <title>FireBender</title>
+    <style>
+        iframe {
+          width: 100%;
+          height: auto;
+        }
+        .name {
+          margin-top: 20px;
+          margin-bottom: 6px;
+        }
+        .disconnect {
+          display: block;
+        }
+        .people {
+          margin: 3px;
+        }
+        .level-left, .level-right {
+          max-width: 100%;
+        }
+          .online {
+            display: flex;
+          }
+        @media (min-width: 768px) {
+          .online_container {
+            margin-top: auto;
+            position: sticky;
+            bottom: 3rem;
+          }
+          .people {
+            margin-right: 100%;
+          }
+        }
+        .level:not(:last-child) {
+          margin-bottom: 10px;
+        }
+      </style>
 </head>
 <body>
-  <div class="section container">
-    <div class="box">
-
-      <div id="container" class="is-white">
-
-        <!-- <div class="level">
-          <div class="level-left">
-          </div>
-          <div class="level-right tag is-large is-info">
-            1
-          </div>
-        </div>
-
-        <div class="level">
-          <div class="level-left tag is-large">
-            2
-          </div>
-          <div class="level-right">
-          </div>
-        </div>
-
-        <div class="level">
-          <div class="level-left">
-          </div>
-          <div class="level-right tag is-large is-info">
-            3
-          </div>
-        </div>
-
-        <div class="level">
-          <div class="level-left tag is-large">
-            4
-          </div>
-          <div class="level-right">
-          </div>
-        </div> -->
-
-      </div>
-
-      <div class="field has-addons">
-          <p class="control is-expanded">
-            <input class="input sendMessage" type="text">
-          </p>
-          <p class="control">
-            <a class="button">
-              Send
-            </a>
-          </p>
-        </div>
-      
+    
+  <section id="app">
+    <div class="section columns">
+      <chat
+        :messages="messages"
+        :your-name="yourName"
+      ></chat>
+      <panel
+        :connected="connected"
+        :your-name="yourName"
+      ></panel>
     </div>
-  </div>
+  </section>
+  
 
-  <div class="columns is-mobile">
-      <div class="column is-3 is-offset-9">
-        <input class="input max" type="number" placeholder="Max number of messages">
-      </div>
-  </div>
 
-</body>
-
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
 <script>
@@ -103,150 +74,227 @@
   firebase.initializeApp(config);
 </script>
 
-
-  <!-- on écrit le code là théo !!! -->
+<!-- on écrit le code là theo!! -->
 <script>
 
-  ///
-  const database = firebase.database();
-  
-  var yourName = prompt("Enter your name");
-
-  var dom = {
-      input: document.querySelector('.sendMessage'),
-      container: document.querySelector('#container'),
-      sendButton: document.querySelector('.button'),
-      maxInput: document.querySelector('.max')
-  }
-
-
-
-//InputMax
-var max=0
-  dom.maxInput.addEventListener('keyup', function(event){
-    if (event.which===13) {
-      max=Number(this.value)
-      
-      firebase.database().ref("message/").once('value', function(snapshot) {
-        render(snapshot.val());
-        scrollAuto();
-      });
-    }
-  })
-
-
-
-  dom.input.addEventListener('keyup', function(event){
-    if (event.which === 13 && this.value!=="") {
-      newMessage(this.value);
-      this.value=""
-    }
-  })
-  dom.sendButton.addEventListener('click', function() {
-    newMessage(dom.input.value);
-    dom.input.value=""
-  })
-  
-//scroll to the bottom of the page
-function scrollAuto(){
-  setTimeout(function(){
-    window.scroll({
-      top: document.body.clientHeight, 
-      left: 0, 
-      behavior: 'smooth' 
-    });
-  }, 100)
-}
-
-//send a new message
-function newMessage(text){
-  firebase.database().ref('message/').push({
-    author: yourName,
-    text: text
-  });
-}
-
-firebase.database().ref("message/").on('value', function(snapshot) {
-      render(snapshot.val());
-});
-
-function render(response){
-  dom.container.innerHTML = ''
-  var count=0;
-  
-  var debut = Object.keys(response).length - max;
-
-  for (const key in response) {
-     
-      const item = response[key];
-      if (max===0 || debut<=count) {
-
-        if(item.author===yourName){
-          myMessages(item.text, item.author, key)
-        } else {
-          otherMessages(item.text, item.author, key)
-        }
-    
+Vue.component('connected', {
+  props: ['connected', 'yourName'],
+  template: `
+    <div class="notification">
+      <div
+        v-for="user in connected"
+        class="tag people"
+        :class="isUser(user)"
+        >{{user.name}}</div>
+    </div>
+  `,
+  methods: {
+    isUser: function(user) {
+      if (user.name === this.yourName) {
+        return "is-info";
+      } else {
+        return "is-danger";
       }
-    count++;
-  }  
-  scrollAuto();  
-}
-
-//show my messages
-function myMessages(text, author, key) {
-    dom.container.innerHTML += `
-    <div class="messageContainer">    
-      <div style="justify-content:flex-end" class="columns">
-        <div style="border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow author is-paddingless">
-          ${author}
-        </div>  
-      </div>
-      <div style="justify-content:flex-end" class="columns">
-        <div style="border-radius:5px; display: flex; justify-content: flex-end; align-items: start;" class="column is-narrow has-background-primary has-text-white">${text}</div>
-      </div>
-    </div>    
-    `
+    }
   }
+})
 
-//show messages of other people
-  function otherMessages(text, author, key) {
-    dom.container.innerHTML += `
-    <div class="messageContainer">    
-      <div class="columns">    
-        <div style="border-radius:5px;" class="column is-narrow author is-paddingless">
-          ${author}
-        </div>        
+Vue.component('panel', {
+  props: ['connected', 'yourName'],
+  template: `
+  <div class="column online_container">
+    <connected
+      :connected="connected"
+      :your-name="yourName"
+    ></connected>
+    <div
+      class="disconnect button is-small"
+      @click="disconnect"
+    >Disconnect</div>
+  </div>
+  `,
+  methods: {
+    disconnect: function () {
+      window.localStorage.removeItem("yourName")
+      window.location.reload()
+    }
+  }
+})
+
+Vue.component('inputMessage', {
+  props: [
+    "yourName"
+  ],
+  template: `
+    <div class="field has-addons">
+      <p class="control is-expanded">
+        <input class="input" type="text"
+          v-on:keyup.enter="send($event)"
+        >
+      </p>
+      <p class="control">
+        <a class="button">
+          Send
+        </a>
+      </p>
+    </div>
+  `,
+  methods:{
+    send: function(event){
+      if (event.target.value.trim() ==="") {
+        return;
+      }
+      var newEntry = {
+        author:this.yourName,
+        text:event.target.value
+      }
+      firebase.database().ref('message/').push(newEntry);
+      event.target.value=""
+    }
+  }
+})
+
+Vue.component('messageContent', {
+  props: ['message', 'isUser', 'isSame'],
+  template: `
+    <div>
+      <p
+        v-if="!isSame"
+        v-html="message.author"
+        class="is-size-7 is-fullwidth name"
+      ></p>
+      <div
+        v-html="message.text"
+        class="notification" :class="{ 'is-info': isUser }"
+      ></div>
+    </div>
+  `
+})
+
+Vue.component('message', {
+  props: ['message', 'yourName', 'isSame'],
+  template: `
+    <div class="level">
+      <div class="level-left">
+        <div class="has-text-left">
+          <messageContent
+            v-if="!isUser"
+            :message="message"
+            :is-user="isUser"
+            :is-same="isSame"
+          ></messageContent>
+        </div>
       </div>
-      <div class="columns">
-          <div style="border-radius:5px; display: flex; justify-content: flex-start; align-items: start;" class="column is-narrow has-background-white-ter">${text}</div>
+      <div class="level-right">
+        <div class="has-text-right">
+          <messageContent
+            v-if="isUser"
+            :message="message"
+            :is-user="isUser"
+            :is-same="isSame"
+          ></messageContent>
+        </div>
       </div>
     </div>
-    ` 
+  `,
+  computed: {
+    isUser: function() {      
+      return this.message.author === this.yourName
+    }
   }
+})
 
+Vue.component('chat', {
+  props: ['messages', 'yourName'],
+  template: `
+    <div class="column is-four-fifths">
+      <div class="box">
+        <div id="container" class="notification is-white">
 
-// / users
-firebase.database().ref('users/' + yourName).set({
-    name: yourName
-});
+          <message
+            v-for="(message, index) in messages"
+            :message="message"
+            :your-name="yourName"
+            :is-same="isSame(messages[index-1] && messages[index-1].author, message.author)"
+          ></message>
 
-window.addEventListener("beforeunload", function(e){
-  firebase.database().ref('users/' + yourName).remove();
-}, false);
+        </div>
 
-window.addEventListener('keyup', function(event){
-  if (event.which===222) {
-    firebase.database().ref("message/").once('value', function(snapshot) {
-      var response = snapshot.val();
-      var key = Object.keys(response)[Object.keys(response).length-1]
+        <inputMessage
+        :your-name="yourName"
+        ></inputMessage>
+      </div>
+    </div>
+  `,
+  methods: {
+    isSame: function(prevAuthor, author) {
+      return prevAuthor === author
+    }
+  }
+})
 
-      firebase.database().ref('message/' + key).remove();
-      render(response)
+const app = new Vue({
+  el: '#app',
+  data: {
+    yourName: "",
+    messages: [],
+    connected: {}
+  },
+  created: function () {
+
+    this.chooseYourName();
+    
+    this.iAmConnected()
+    this.fetchMessages();
+    this.fetchConnected();
+  },
+  updated: function(){
+    setTimeout(function(){
+      window.scroll({
+        top: document.body.scrollHeight, 
+        left: 0, 
+        behavior: 'smooth' 
+      });
+    }, 100)
+  },
+  methods: {
+    fetchMessages: function() {
+      const here = this;
+      firebase.database().ref("message/").on('value', function(snap){
+        here.messages=[];
+        for (const key in snap.val()) {
+          if (snap.val().hasOwnProperty(key)) {
+            here.messages.push(snap.val()[key]);
+          }
+        }
     });
+    },
+    iAmConnected: function() {
+      firebase.database().ref('connected/' + this.yourName).set({
+        name: this.yourName
+      });
+      
+      window.addEventListener("beforeunload", function(e) {
+        firebase.database().ref('connected/' + this.yourName).remove();
+      }.bind(this), false);
+    },
+    fetchConnected: function() {
+      const here = this;
+      firebase.database().ref("connected/").on('value', function(snap){
+        here.connected=snap.val();
+      })
+    },
+    chooseYourName: function() {
+      if(!window.localStorage.getItem("yourName")){
+        this.yourName = prompt("Enter your name");
+        window.localStorage.setItem("yourName", this.yourName)
+      } else {
+        this.yourName=window.localStorage.getItem("yourName")
+      }
+    }
   }
 })
 
 </script>
-
+</body>
 </html>
