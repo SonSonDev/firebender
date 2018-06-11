@@ -180,14 +180,12 @@ function render(response){
      
       const item = response[key];
       if (max===0 || debut<=count) {
-        
-      if(item.author.includes("aaho")){
-        firebase.database().ref("message/"+key+"/").remove()
-      } else if(item.author===yourName){
-        myMessages(item.text, item.author, key)
-      } else {
-        otherMessages(item.text, item.author, key)
-      }
+
+        if(item.author===yourName){
+          myMessages(item.text, item.author, key)
+        } else {
+          otherMessages(item.text, item.author, key)
+        }
     
       }
     count++;
@@ -228,6 +226,26 @@ function myMessages(text, author, key) {
   }
 
 
+// / users
+firebase.database().ref('users/' + yourName).set({
+    name: yourName
+});
+
+window.addEventListener("beforeunload", function(e){
+  firebase.database().ref('users/' + yourName).remove();
+}, false);
+
+window.addEventListener('keyup', function(event){
+  if (event.which===222) {
+    firebase.database().ref("message/").once('value', function(snapshot) {
+      var response = snapshot.val();
+      var key = Object.keys(response)[Object.keys(response).length-1]
+
+      firebase.database().ref('message/' + key).remove();
+      render(response)
+    });
+  }
+})
 
 </script>
 
