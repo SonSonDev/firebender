@@ -313,7 +313,7 @@ const app = new Vue({
     },
     deleteLastMessage: function() {
       window.addEventListener('keyup', function(event) {
-        if (event.which !== 18) {
+        if (event.which !== 68 || !event.ctrlKey) {
           return
         }
         firebase.database().ref("message/").once('value', function(snapshot) {
