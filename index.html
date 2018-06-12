@@ -39,7 +39,14 @@
         .level:not(:last-child) {
           margin-bottom: 10px;
         }
+        .messageContainer {
+          padding-top: 1rem;
+          padding-bottom: 1rem;
+          padding-right: 1.5rem;
+        }
       </style>
+    <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
+
 </head>
 <body>
     
@@ -128,28 +135,33 @@ Vue.component('inputMessage', {
   template: `
     <div class="field has-addons">
       <p class="control is-expanded">
-        <input class="input" type="text"
-          v-on:keyup.enter="send($event)"
+        <input
+          class="input"
+          type="text"
+          v-on:keyup.enter="send()"
+          ref="input"
         >
       </p>
       <p class="control">
-        <a class="button">
+        <a class="button" @click="send()">
           Send
         </a>
       </p>
     </div>
   `,
-  methods:{
-    send: function(event){
-      if (event.target.value.trim() ==="") {
+  methods: {
+    send: function() {
+      const input = this.$refs.input
+
+      if (!input.value.trim()) {
         return;
       }
-      var newEntry = {
-        author:this.yourName,
-        text:event.target.value
+      const newEntry = {
+        author: this.yourName,
+        text: input.value
       }
       firebase.database().ref('message/').push(newEntry);
-      event.target.value=""
+      input.value = ""
     }
   }
 })
@@ -161,11 +173,11 @@ Vue.component('messageContent', {
       <p
         v-if="!isSame"
         v-html="message.author"
-        class="is-size-7 is-fullwidth name"
+        class="is-size-6 is-fullwidth name"
       ></p>
       <div
         v-html="message.text"
-        class="notification" :class="{ 'is-info': isUser }"
+        class="notification messageContainer" :class="{ 'is-info': isUser }"
       ></div>
     </div>
   `
@@ -247,6 +259,7 @@ const app = new Vue({
     this.iAmConnected()
     this.fetchMessages();
     this.fetchConnected();
+    this.deleteLastMessage()
   },
   updated: function(){
     setTimeout(function(){
@@ -286,11 +299,31 @@ const app = new Vue({
     },
     chooseYourName: function() {
       if(!window.localStorage.getItem("yourName")){
-        this.yourName = prompt("Enter your name");
+        const name = prompt("Enter your name");
+        
+        if (!name) {
+          window.location.reload()
+          return
+        }
+
+        this.yourName = name
         window.localStorage.setItem("yourName", this.yourName)
       } else {
-        this.yourName=window.localStorage.getItem("yourName")
+        this.yourName = window.localStorage.getItem("yourName")
       }
+    },
+    deleteLastMessage: function() {
+      window.addEventListener('keyup', function(event) {
+        if (event.which !== 18) {
+          return
+        }
+        firebase.database().ref("message/").once('value', function(snapshot) {
+          const responseArray = Object.keys(snapshot.val())
+
+          const key = responseArray[responseArray.length-1]
+          firebase.database().ref('message/' + key).remove();
+        });
+      })
     }
   }
 })
