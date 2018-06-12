@@ -88,20 +88,19 @@ Vue.component('connected', {
   props: ['connected', 'yourName'],
   template: `
     <div class="notification">
+      <div class="is-size-7 people">
+      Online({{Object.keys(connected).length}})
+      </div>
       <div
         v-for="user in connected"
         class="tag people"
-        :class="isUser(user)"
+        :class="isUser(user) ? 'is-info' : 'is-danger'"
         >{{user.name}}</div>
     </div>
   `,
   methods: {
     isUser: function(user) {
-      if (user.name === this.yourName) {
-        return "is-info";
-      } else {
-        return "is-danger";
-      }
+      return user.name === this.yourName
     }
   }
 })
@@ -173,7 +172,7 @@ Vue.component('messageContent', {
       <p
         v-if="!isSame"
         v-html="message.author"
-        class="is-size-6 is-fullwidth name"
+        class="is-size-6 is-fullwidth name has-text-grey-dark"
       ></p>
       <div
         v-html="message.text"
