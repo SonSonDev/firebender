@@ -1,9 +1,9 @@
 <template>
   <div class="notification">
     <div class="is-size-7 people">
-      Online({{Object.keys(connected).length}})
+      Online({{Object.keys(users).length}})
     </div>
-    <div v-for="(user, index) in connected"
+    <div v-for="(user, index) in users"
          class="tag people"
          :class="isUser(user) ? 'is-info' : 'is-danger'"
          :key="index">{{user.name}}
@@ -13,7 +13,16 @@
 
 <script>
 export default {
-  props: ['connected', 'yourName'],
+  props: {
+    'users': {
+      type: Object,
+      required: true
+    },
+    'yourName': {
+      type: String,
+      required: true
+    }
+  },
   methods: {
     isUser: function(user) {
       return user.name === this.yourName

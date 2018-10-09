@@ -26,7 +26,20 @@
 <script>
 import messageContent from "./MessageContent.vue"
 export default {
-  props: ['message', 'yourName', 'isSame'],
+  props: {
+    'message': {
+      type: Object,
+      required: true
+    },
+    'yourName': {
+      type: String,
+      required: true
+    },
+    'isSame': {
+      type: Boolean,
+      required: true
+    }
+  },
   components:{
     messageContent
   },

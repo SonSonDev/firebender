@@ -13,6 +13,19 @@
 
 <script>
 export default {
-  props: ['message', 'isUser', 'isSame']
+  props: {
+    'message': {
+      type: Object,
+      required: true
+    },
+    'isUser': {
+      type: Boolean,
+      required: true
+    },
+    'isSame': {
+      type: Boolean,
+      required: true
+    }
+  }
 }
 </script>

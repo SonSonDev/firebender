@@ -1,4 +1,4 @@
-import firebase from 'firebase';
+import firebase from 'firebase'
 
 var config = {
   apiKey: "AIzaSyCmYqUupRx-PTlbr1xNMGWAkFE3Uk87K9o",
@@ -7,6 +7,6 @@ var config = {
   projectId: "firebender-12345",
   storageBucket: "firebender-12345.appspot.com",
   messagingSenderId: "970384728078"
-};
-firebase.initializeApp(config);
+}
+firebase.initializeApp(config)
 

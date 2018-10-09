@@ -1,8 +1,8 @@
 <template>
   <div class="column online_container">
-    <ConnectedUser :connected="connected"
+    <ConnectedUsers :users="users"
                    :your-name="yourName">
-    </ConnectedUser>
+    </ConnectedUsers>
     <div class="disconnect button is-small"
          @click="disconnect">Disconnect
     </div>
@@ -10,11 +10,21 @@
 </template>
 
 <script>
-import ConnectedUser from "./Panel/ConnectedUser.vue"
+import ConnectedUsers from "./Panel/ConnectedUsers.vue"
 
 export default {
-  props: ['connected', 'yourName'],
-  components: { ConnectedUser },
+  props: {
+    'users': {
+      type: Object,
+      required: true
+    },
+    'yourName': {
+      type: String,
+      required: true
+    }
+  },
+  
+  components: { ConnectedUsers },
   methods: {
     disconnect: function () {
       window.localStorage.removeItem("yourName")

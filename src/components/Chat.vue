@@ -23,7 +23,16 @@ import Message from "./Chat/Message.vue"
 import InputMessage from "./Chat/InputMessage.vue"
 
 export default {
-  props: ['messages', 'yourName'],
+  props: {
+    'messages': {
+      type: Array,
+      required: true
+    },
+    'yourName': {
+      type: String,
+      required: true
+    }
+  },
   components: { Message, InputMessage },
   methods: {
     isSame: function(prevAuthor, author) {

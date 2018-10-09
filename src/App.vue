@@ -4,7 +4,7 @@
       <Chat :messages="messages"
             :your-name="yourName">
       </Chat>
-      <Panel :connected="connected"
+      <Panel :users="users"
              :your-name="yourName">
       </Panel>
     </div>
@@ -15,18 +15,18 @@
 import Chat from '@/components/Chat.vue'
 import Panel from '@/components/Panel.vue'
 import firebase from 'firebase'
-import firebaseMethods from '@/Mixins'
+import fireMethods from '@/Mixins'
 
 export default {
   name: 'app',
-  mixins: [firebaseMethods],
+  mixins: [ fireMethods ],
   components: {
     Chat, Panel
   },
   data: () => ({
     yourName: "",
     messages: [],
-    connected: {}
+    users: {}
   }),
   methods: {
     // Verify yourName in localStorage
@@ -47,7 +47,7 @@ export default {
   created () {
     this.chooseYourName()
     this.iAmConnected()
-    this.messages = this.fetchMessages()
+    this.fetchMessages()
     this.fetchConnected()
     this.deleteLastMessage()
   },

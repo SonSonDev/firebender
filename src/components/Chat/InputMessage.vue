@@ -4,7 +4,7 @@
       <input class="input"
              type="text"
              @keyup.enter="send()"
-             ref="input">
+             v-model="inputValue">
     </p>
     <p class="control">
       <a class="button"
@@ -15,15 +15,31 @@
 </template>
 
 <script>
-import firebase from 'firebase';
+import firebase from 'firebase'
 import firebaseMethods from "@/Mixins"
 export default {
   mixins: [firebaseMethods],
-  props: [
-    "yourName"
-  ],
+  data: () => ({
+    inputValue:""
+  }),
+  props: {
+    'yourName': {
+      type: String,
+      required: true
+    }
+  },
   methods: {
-    
+    send () {
+      if (!this.inputValue.trim()) {
+        return
+      }
+      const newEntry = {
+        author: this.yourName,
+        text: this.inputValue
+      }
+      firebase.database().ref('message/').push(newEntry)
+      this.inputValue = ""
+    }
   }
 
 }
